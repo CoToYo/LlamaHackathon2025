@@ -33,9 +33,11 @@ class ScriptWriter:
         product_pros_cons = product_dict["product_pros_cons"]
         product_sentiment = product_dict["product_sentiment"]
         prompt = f"""
-        Given the following product details {product_details}, pros and cons {product_pros_cons}, sentiment analysis {product_sentiment},
-        Generate a {time} long introduction script to describe this product, attract more target users, make the context fun and appealing. 
+        You are trying to sell this product through live stream. Give an opening introduction for this product. The targets are to attract more target users, make the live stream fun and appealing.
+        You have the product details {product_details}, real customer reviews and pros and cons {product_pros_cons}, sentiment analysis {product_sentiment},
+        Generate a {time} long introduction script to describe this product. Please note the actual live stream contains product introduction, audience comments addressing, so don't make the intro sounds like something you can only say once.
         Give me script only.
+        Don't repeat on the same information in product details.
         """
         return self._call_llama_api(prompt)
 

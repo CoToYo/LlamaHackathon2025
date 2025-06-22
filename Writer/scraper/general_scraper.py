@@ -40,23 +40,28 @@ class ProductScraper:
 
     def product_details(self, product: str):
         details_prompt = f"""
-        Given this provided product introduction {product}, please give me a more detailed introduction about this product.
+        Given this provided product introduction {product}, please give me a detailed, 
+        as thorough as possible summary of all features about this product. 
+        If there are any real customer reviews in the content, 
+        please also extract the real product introduction from the reviews. 
+        Please also make sure the results are accurate.
         """
         return self._call_llama_api(details_prompt)
     
     
     def product_pros_cons(self, product, product_details):
         pros_cons_prompt = f"""
-                If there are any real user review, extract it. Otherwise predict potential product reviews and user feedback 
-                based on the original product description {product} and early generated product details {product_details}.
-                Focus on actual user experiences, ratings, and opinions.
+        if there are any real user reviews, extract it and make sure they are accurate. 
+        Otherwise predict potential product reviews and user feedback based on the original product description {product}
+        and early generated product details {product_details}.
+        Focus on actual user experiences, ratings, and opinions. Be thorough. Please also make sure the results are accurate.
         """
         
         return self._call_llama_api(pros_cons_prompt)
     
-    def product_sentiment(self, input: str):
+    def product_sentiment(self, product_details: str):
         sentiment_prompt = f"""
-        please analyze the sentiment based on the product details {input}.
+        please analyze the sentiment based on the product details {product_details}.
         """
         return self._call_llama_api(sentiment_prompt)
 

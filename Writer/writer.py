@@ -91,8 +91,93 @@ def main():
     # Initialize the processor
     processor = Writer()
    
-    test_input = "placeholder"
-    test_question = "placeholder"
+    test_input = f"""
+    (1) PRODUCT SPECS
+
+Product Name: Samsung 43-Inch Class Serif QLED 4K Smart TV
+Model Number: QN43LS01TAFXZA
+Brand: Samsung
+Color: Black
+Screen Size: 43 inches
+Item Weight: 38.8 pounds
+Product Dimensions: 16.4 x 38.8 x 40.5 inches
+Aspect Ratio: 16:9
+Voltage: 120 Volts
+Batteries: 2 AAA batteries required
+Speaker Type: Built-In
+Special Features:
+- Flat screen
+- 100% Color Volume with Quantum Dot
+- NFC on TV (Android audio mirroring)
+- Ambient Mode+ (custom décor/art display)
+- Quantum Processor 4K (AI upscaling)
+- Alexa Built-In
+- Smart TV OS with Bixby, Alexa, Google Assistant
+
+Smart Features:
+- Access to Samsung TV Plus (200+ free channels)
+- One-touch mirroring via NFC
+- Wi-Fi built-in; no external boxes needed
+- Solar-powered remote with USB charging option
+
+Ratings & Availability:
+- 4.0 out of 5 stars (207 reviews)
+- Amazon Best Seller Rank:
+   - #63,593 in Electronics
+   - #171 in QLED TVs
+- ASIN: B086LKCLQL
+- First Available: April 27, 2020
+
+(2) USER REVIEW
+
+What Users Love:
+- Design: Stylish, unique, and seamlessly blends into decor
+- Functionality: Standalone smart TV with built-in apps
+- Portability: Easy to move around and set up
+- Art Mode: Loved by users for displaying images and weather
+- No Additional Devices: Works without Firestick or Apple TV
+- Remote: Solar-powered and convenient
+
+Common Complaints:
+- Durability Issues: One user experienced "Black Screen of Death" after 3 years
+- UI/UX Frustrations: Remote syncing problems, app installation confusion, Hulu glitches
+- Network Instability: Random disconnects requiring reboots
+- Software Limitations: Clunky navigation and non-intuitive menus
+
+Notable Quotes:
+- “Looks very aesthetic, we are very happy.”
+- “Elegant and interesting in design. Perfectly acceptable picture quality.”
+- “Died right after 3 years... can’t recommend it despite the looks.”
+- “I was able to toss all my boxes... the TV stands alone and looks really great.”
+- “Bought for the design — not disappointed, but the software is meh.”
+
+(3) IMPORTANT FAQ
+
+Q: Is this TV wall-mountable?
+A: No, this model is designed to stand independently like furniture and is not optimized for wall mounting.
+
+Q: Does it come with art or do I need to pay for Ambient Mode content?
+A: Comes with preloaded visuals and the exclusive Bouroullec palette. No extra fees for Ambient Mode+ content.
+
+Q: Can I use this TV without any streaming boxes (Fire Stick, Apple TV)?
+A: Yes. The built-in smart OS supports most major apps and Samsung TV Plus offers 200+ free channels.
+
+Q: Can I connect my phone to this TV?
+A: Yes, Android users can use NFC for quick music/audio mirroring. Screen mirroring also supported.
+
+Q: What voice assistants does it support?
+A: Alexa, Google Assistant, and Samsung’s Bixby are built-in.
+
+Q: How is this different from Samsung’s Frame TV?
+A: The Serif is freestanding and furniture-like, while The Frame is designed to mount flush on a wall. Serif includes built-in art mode content for free.
+
+Q: Does the remote use batteries?
+A: No standard batteries needed—it uses solar power and can also charge via USB.
+
+Q: How’s the software experience?
+A: Mixed. Users praise the design and basic functions, but note occasional bugs, slow menus, and a learning curve with app navigation.
+    """
+    test_question = "I live in a big 3000 sqft house, is this TV good for my high celling living room?"
     intro_time = "40 seconds"
     answer_time = "10 seconds"
 

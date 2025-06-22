@@ -33,8 +33,10 @@ class CommentResponder:
         product_pros_cons = product_dict["product_pros_cons"]
         product_sentiment = product_dict["product_sentiment"]
         prompt = f"""
-        Given the following product details {product_details}, pros and cons {product_pros_cons}, sentiment analysis {product_sentiment},
-        answer the question {question} based on the above information. Generate a {time} long answer, attract more target users, make the context fun and appealing. 
+        You are a comment responder, your job is to give customer accurate response based on their question and the following product details.
+        Try to make the context fun and appealing, but if the question is about product features, be accurate.
+        You have product details {product_details}, pros and cons {product_pros_cons}, sentiment analysis {product_sentiment}.
+        Answer the question {question} based on the above information. Generate a {time} long answer.
         Don't repeat on the same information in product details.
         Give me script only.
         """
