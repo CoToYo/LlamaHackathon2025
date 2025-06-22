@@ -2,7 +2,7 @@
  * Splits text into chunks of approximately the specified word count,
  * only breaking at sentence boundaries.
  */
-export function splitIntoChunks(text: string, maxWordsPerChunk: number = 30): string[] {
+export function splitIntoChunks(text: string, maxWordsPerChunk: number = 50): string[] {
   // Split into sentences (handling multiple punctuation marks)
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
   const chunks: string[] = [];

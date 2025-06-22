@@ -79,6 +79,90 @@ function InteractiveAvatar() {
     }
   };
 
+  //   const processCommentsAsChunks = async (avatar: any) => {
+  //     const comments = await fetchComments();
+
+  //     if (comments.length === 0) {
+  //       return [];
+  //     }
+
+  //     const commentChunks = [];
+
+  //     for (const comment of comments) {
+  //       try {
+  //         const apiResponse = await fetch("/api/llama-chat", {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({
+  //             messages: [
+  //               {
+  //                 role: "system",
+  //                 content: `You are a charismatic and engaging livestream host. Your job is to respond to viewer comments in a way that is:
+
+  // Concise – Keep it short and to the point.
+
+  // Entertaining – Add personality, wit, and light humor.
+
+  // Natural – Sound like you're speaking live, not reading a script.
+
+  // Interactive – Maintain flow and bridge smoothly to the next comment or topic.
+
+  // Instructions:
+  // You will be given a viewer comment and an intended reaction.
+  // Rewrite it into a spoken-style host response that feels fun, real, and keeps the energy high.
+
+  // Rules:
+
+  // Only output the host's spoken line.
+
+  // Always repeat the comment back to the user first in a friendly and engaging way.
+
+  // No extra explanation, narration, or tags.
+
+  // Make it friendly, lively, and flowing.`
+  //               },
+  //               {
+  //                 role: "user",
+  //                 content: formatCommentForSpeech(comment),
+  //               },
+  //             ],
+  //           }),
+  //         });
+
+  //         if (!apiResponse.ok) {
+  //           console.error("Failed to call Llama API");
+  //           continue;
+  //         }
+
+  //         const result = await apiResponse.json();
+  //         commentChunks.push(result.content);
+
+  //         // Acknowledge the comment after successful processing
+  //         try {
+  //           await fetch(`/api/responses/${comment.comment_id}/ack`, {
+  //             method: "POST",
+  //           });
+  //           console.log(`Acknowledged comment: ${comment.comment_id}`);
+  //         } catch (ackError) {
+  //           console.error(`Failed to acknowledge comment ${comment.comment_id}:`, ackError);
+  //         }
+
+  //         // commentChunks.push(formatCommentForSpeech(comment));
+  //       } catch (error) {
+  //         console.error("Error processing comment:", error);
+  //       }
+  //     }
+
+  //     // Add closing for comments
+  //     if (commentChunks.length > 1) { // More than just the introduction
+  //       commentChunks.push("Ok. Let's continue.");
+  //     }
+
+  //     return commentChunks;
+  //   };
+
   const processCommentsAsChunks = async (avatar: any) => {
     const comments = await fetchComments();
 
@@ -88,73 +172,76 @@ function InteractiveAvatar() {
 
     const commentChunks = [];
 
-    // Add introduction for comments
-    // commentChunks.push("Wow, I see some questions from our viewers. Let me address them.");
-
+    // combine comments and answers into a single string
+    let combinedString = "";
     for (const comment of comments) {
+      combinedString += `comment: ${comment.question}\nanswer: ${comment.answer}\n\n`;
+      // Acknowledge the comment after successful processing
       try {
-        const apiResponse = await fetch("/api/llama-chat", {
+        await fetch(`/api/responses/${comment.comment_id}/ack`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            messages: [
-              {
-                role: "system",
-                content: `You are a charismatic and engaging livestream host. Your job is to respond to viewer comments in a way that is:
-
-Concise – Keep it short and to the point.
-
-Entertaining – Add personality, wit, and light humor.
-
-Natural – Sound like you're speaking live, not reading a script.
-
-Interactive – Maintain flow and bridge smoothly to the next comment or topic.
-
-Instructions:
-You will be given a viewer comment and an intended reaction.
-Rewrite it into a spoken-style host response that feels fun, real, and keeps the energy high.
-
-Rules:
-
-Only output the host's spoken line.
-
-No extra explanation, narration, or tags.
-
-Make it friendly, lively, and flowing.`
-              },
-              {
-                role: "user",
-                content: formatCommentForSpeech(comment),
-              },
-            ],
-          }),
         });
-
-        if (!apiResponse.ok) {
-          console.error("Failed to call Llama API");
-          continue;
-        }
-
-        const result = await apiResponse.json();
-        commentChunks.push(result.content);
-
-        // Acknowledge the comment after successful processing
-        try {
-          await fetch(`/api/responses/${comment.comment_id}/ack`, {
-            method: "POST",
-          });
-          console.log(`Acknowledged comment: ${comment.comment_id}`);
-        } catch (ackError) {
-          console.error(`Failed to acknowledge comment ${comment.comment_id}:`, ackError);
-        }
-
-        // commentChunks.push(formatCommentForSpeech(comment));
-      } catch (error) {
-        console.error("Error processing comment:", error);
+        console.log(`Acknowledged comment: ${comment.comment_id}`);
+      } catch (ackError) {
+        console.error(`Failed to acknowledge comment ${comment.comment_id}:`, ackError);
       }
     }
+
+    // send combinedString to llama api for polishing
+    try {
+      const apiResponse = await fetch("/api/llama-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system",
+              content: `You are a charismatic and engaging livestream host. Your job is to respond to viewer comments in a way that is:
+
+  Concise – Keep it short and to the point.
+
+  Entertaining – Add personality, wit, and light humor.
+
+  Natural – Sound like you're speaking live, not reading a script.
+
+  Interactive – Maintain flow and bridge smoothly to the next comment or topic.
+
+  Instructions:
+  You will be given a viewer comment and an intended reaction.
+  Rewrite it into a spoken-style host response that feels fun, real, and keeps the energy high.
+  Remember to repeat the comment back so the user knows you are addressing their question.
+  Keep the order of the comments.
+
+  Rules:
+
+  Only output the host's spoken line.
+
+  No extra explanation, narration, or tags.
+
+  Make it friendly, lively, and flowing.`
+            },
+            {
+              role: "user",
+              content: combinedString,
+            },
+          ],
+        }),
+      });
+
+      if (!apiResponse.ok) {
+        console.error("Failed to call Llama API");
+        return [];
+      }
+
+      const result = await apiResponse.json();
+      commentChunks.push(result.content);
+
+    } catch (error) {
+      console.error("Error processing comment:", error);
+    }
+
 
     // Add closing for comments
     if (commentChunks.length > 1) { // More than just the introduction
@@ -235,6 +322,8 @@ Make it friendly, lively, and flowing.`
       if (isVoiceChat) {
         await startVoiceChat();
       }
+
+      await new Promise(resolve => setTimeout(resolve, 10000));
 
       avatar.speak({
         text: "Welcome to the live stream hosted by Lisa, we are very excited to welcome you",
