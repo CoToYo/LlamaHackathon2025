@@ -28,7 +28,10 @@ class ScriptWriter:
         except Exception as e:
             print(f"⚠️  Warning: Could not initialize Llama API client: {str(e)}")
 
-    def generate_script(self, product_details, product_pros_cons, product_sentiment, time):
+    def generate_script(self, product_dict, time):
+        product_details = product_dict["product_details"]
+        product_pros_cons = product_dict["product_pros_cons"]
+        product_sentiment = product_dict["product_sentiment"]
         prompt = f"""
         Given the following product details {product_details}, pros and cons {product_pros_cons}, sentiment analysis {product_sentiment},
         Generate a {time} long introduction script to describe this product, attract more target users, make the context fun and appealing. 
@@ -85,26 +88,10 @@ class ScriptWriter:
         except Exception as e:
             print(f"❌ Error saving data: {str(e)}")
 
-def main(product_name: str = "Meta Ray-Ban Smart Glasses"):
+def main(product_dict, time):
     """Main function for testing the scraper."""
-    writer = ScriptWriter()
-    # Load product data
-    # Clean product name for filename (remove special characters, replace spaces with underscores)
-    clean_name = "".join(c for c in product_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
-    clean_name = clean_name.replace(' ', '_').replace('-', '_')
-
-    script_dir = Path(__file__).parent.parent
-    filepath = f'{script_dir}/scraper/output/products/{clean_name}.json'
-
-    if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            product_details = data["product_details"]
-            product_pros_cons = data["product_pros_cons"]
-            product_sentiment = data["product_sentiment"]
-    else:
-        print(f"❌ Product data file not found: {filepath}")
-        return
+    writer = ScriptWriter() 
+    return writer.generate_script(product_dict, time)
 
     # Generate script
     intro_script = writer.generate_script(product_details, product_pros_cons, product_sentiment, "40 seconds")
@@ -119,4 +106,4 @@ def main(product_name: str = "Meta Ray-Ban Smart Glasses"):
 
 
 if __name__ == "__main__":
-    main() 
+    main("") 

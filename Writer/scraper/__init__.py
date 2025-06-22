@@ -5,6 +5,6 @@ This module contains web scraping functionality for gathering product informatio
 from various online sources.
 """
 
-from .product_scraper import ProductScraper
+from .general_scraper import ProductScraper
 
 __all__ = ['ProductScraper'] 

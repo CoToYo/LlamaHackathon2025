@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 from serpapi import GoogleSearch
 import pandas as pd
 
-class ProductScraper:
+class SearchProductScraper:
     def __init__(self):
         """
         Initialize the ProductScraper with API keys from the centralized manager.
@@ -107,7 +107,7 @@ class ProductScraper:
 
 def main(product_name: str = "Meta Ray-Ban Smart Glasses"):
     """Main function for testing the scraper."""
-    scraper = ProductScraper()
+    scraper = SearchProductScraper()
 
     product_details = scraper.product_details(product_name)
     product_pros_cons = scraper.product_pros_cons(product_name)
