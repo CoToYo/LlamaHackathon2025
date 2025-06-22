@@ -40,3 +40,32 @@ You can create your own custom Interactive Avatars at labs.heygen.com/interactiv
 ### Where can I read more about enterprise-level usage of the Interactive Avatar API?
 
 Please read our Interactive Avatar 101 article for more information on pricing: https://help.heygen.com/en/articles/9182113-interactive-avatar-101-your-ultimate-guide
+
+
+### Recent Changes
+
+1. **API Integration**
+   - Added `commentsApi.ts` to handle fetching and formatting user comments
+   - Implemented comment fetching from AWS API endpoint
+   - Added comment formatting for speech synthesis
+
+2. **Text Processing**
+   - Created `textUtils.ts` with `splitIntoChunks` function
+   - Handles splitting long text into sentence-bounded chunks
+   - Maintains natural speech flow with max words per chunk
+
+3. **Interactive Avatar Component**
+   - Enhanced `InteractiveAvatar.tsx` with:
+     - Script reading capabilities
+     - Sequential chunk speaking
+     - Comment handling system
+     - Event logging for avatar interactions
+     - Voice and text chat modes
+
+4. **Script Handling**
+   - Added `get-script` API route
+   - Implements file reading from `pitch_script.txt`
+   - Integrates with text chunking utility
+   - Provides error handling for script loading
+
+These changes create a comprehensive system for managing avatar interactions, handling user comments, and delivering scripted content in a natural way.

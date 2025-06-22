@@ -6,9 +6,12 @@ import {
   StartAvatarRequest,
   STTProvider,
   ElevenLabsModel,
+  TaskType,
+  TaskMode,
 } from "@heygen/streaming-avatar";
 import { useEffect, useRef, useState } from "react";
 import { useMemoizedFn, useUnmount } from "ahooks";
+import { fetchComments, formatCommentForSpeech } from "@/app/lib/commentsApi";
 
 import { Button } from "./Button";
 import { AvatarConfig } from "./AvatarConfig";
@@ -44,7 +47,6 @@ function InteractiveAvatar() {
   const { startVoiceChat } = useVoiceChat();
 
   const [config, setConfig] = useState<StartAvatarRequest>(DEFAULT_CONFIG);
-
   const mediaStream = useRef<HTMLVideoElement>(null);
 
   async function fetchAccessToken() {
@@ -62,6 +64,55 @@ function InteractiveAvatar() {
       throw error;
     }
   }
+
+  const readPitchScript = async () => {
+    try {
+      const response = await fetch('/api/get-script');
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      return data.chunks;
+    } catch (error) {
+      console.error('Error reading pitch script:', error);
+      return null;
+    }
+  };
+
+  const speakChunksSequentially = async (avatar: any, chunks: string[]) => {
+    for (const chunk of chunks) {
+      await avatar.speak({
+        text: chunk,
+        taskType: TaskType.REPEAT,
+        taskMode: TaskMode.SYNC,
+      });
+    }
+  };
+
+  const handleComments = async (avatar: any) => {
+    const comments = await fetchComments();
+    if (comments.length > 0) {
+      await avatar.speak({
+        text: "Now, let's address some questions from our viewers.",
+        taskType: TaskType.REPEAT,
+        taskMode: TaskMode.SYNC,
+      });
+
+      for (const comment of comments) {
+        await avatar.speak({
+          text: formatCommentForSpeech(comment),
+          taskType: TaskType.REPEAT,
+          taskMode: TaskMode.SYNC,
+        });
+      }
+
+      await avatar.speak({
+        text: "Thank you for all your great questions!",
+        taskType: TaskType.REPEAT,
+        taskMode: TaskMode.SYNC,
+      });
+    }
+  };
 
   const startSessionV2 = useMemoizedFn(async (isVoiceChat: boolean) => {
     try {
@@ -104,6 +155,27 @@ function InteractiveAvatar() {
       if (isVoiceChat) {
         await startVoiceChat();
       }
+
+      avatar.speak({
+        text: "Welcome to the live stream hosted by Lisa, we are very excited to welcome you",
+        taskType: TaskType.REPEAT,
+        taskMode: TaskMode.SYNC,
+      }).then(() => {
+        return avatar.speak({
+          text: "Let's get started",
+          taskType: TaskType.REPEAT,
+          taskMode: TaskMode.SYNC,
+        });
+      }).then(async () => {
+        const scriptChunks = await readPitchScript();
+        if (scriptChunks && scriptChunks.length > 0) {
+          await speakChunksSequentially(avatar, scriptChunks);
+        }
+        return handleComments(avatar);
+      }).catch((error) => {
+        console.error('Error in greeting sequence:', error);
+      });
+
     } catch (error) {
       console.error("Error starting avatar session:", error);
     }
