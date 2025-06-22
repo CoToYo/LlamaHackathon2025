@@ -25,8 +25,6 @@ import { MessageHistory } from "./AvatarSession/MessageHistory";
 
 import { AVATARS } from "@/app/lib/constants";
 
-import { useLlama } from "@/app/lib/useLlama";
-
 const DEFAULT_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
   avatarName: AVATARS[0].avatar_id,
@@ -47,7 +45,6 @@ function InteractiveAvatar() {
   const { initAvatar, startAvatar, stopAvatar, sessionState, stream } =
     useStreamingAvatarSession();
   const { startVoiceChat } = useVoiceChat();
-  const { sendMessage, loading, error } = useLlama();
 
   const [config, setConfig] = useState<StartAvatarRequest>(DEFAULT_CONFIG);
   const mediaStream = useRef<HTMLVideoElement>(null);
@@ -82,55 +79,118 @@ function InteractiveAvatar() {
     }
   };
 
-  const speakChunksSequentially = async (avatar: any, chunks: string[]) => {
-    for (const chunk of chunks) {
-      await avatar.speak({
-        text: chunk,
-        taskType: TaskType.REPEAT,
-        taskMode: TaskMode.SYNC,
-      });
+  const processCommentsAsChunks = async (avatar: any) => {
+    const comments = await fetchComments();
+
+    if (comments.length === 0) {
+      return [];
     }
+
+    const commentChunks = [];
+
+    // Add introduction for comments
+    // commentChunks.push("Wow, I see some questions from our viewers. Let me address them.");
+
+    for (const comment of comments) {
+      try {
+        const apiResponse = await fetch("/api/llama-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "system",
+                content: `You are a charismatic and engaging livestream host. Your job is to respond to viewer comments in a way that is:
+
+Concise – Keep it short and to the point.
+
+Entertaining – Add personality, wit, and light humor.
+
+Natural – Sound like you're speaking live, not reading a script.
+
+Interactive – Maintain flow and bridge smoothly to the next comment or topic.
+
+Instructions:
+You will be given a viewer comment and an intended reaction.
+Rewrite it into a spoken-style host response that feels fun, real, and keeps the energy high.
+
+Rules:
+
+Only output the host's spoken line.
+
+No extra explanation, narration, or tags.
+
+Make it friendly, lively, and flowing.`
+              },
+              {
+                role: "user",
+                content: formatCommentForSpeech(comment),
+              },
+            ],
+          }),
+        });
+
+        if (!apiResponse.ok) {
+          console.error("Failed to call Llama API");
+          continue;
+        }
+
+        const result = await apiResponse.json();
+        commentChunks.push(result.content);
+
+        // Acknowledge the comment after successful processing
+        try {
+          await fetch(`/api/responses/${comment.comment_id}/ack`, {
+            method: "POST",
+          });
+          console.log(`Acknowledged comment: ${comment.comment_id}`);
+        } catch (ackError) {
+          console.error(`Failed to acknowledge comment ${comment.comment_id}:`, ackError);
+        }
+
+        // commentChunks.push(formatCommentForSpeech(comment));
+      } catch (error) {
+        console.error("Error processing comment:", error);
+      }
+    }
+
+    // Add closing for comments
+    if (commentChunks.length > 1) { // More than just the introduction
+      commentChunks.push("Ok. Let's continue.");
+    }
+
+    return commentChunks;
   };
 
-  const handleComments = async (avatar: any) => {
-    const comments = await fetchComments();
-    if (comments.length > 0) {
-      await avatar.speak({
-        text: "Now, let's address some questions from our viewers.",
-        taskType: TaskType.REPEAT,
-        taskMode: TaskMode.SYNC,
-      });
+  const speakChunksSequentially = async (avatar: any, chunks: string[], startIndex: number = 0) => {
+    await avatar.speak({
+      text: chunks[startIndex],
+      taskType: TaskType.REPEAT,
+      taskMode: TaskMode.SYNC,
+    });
 
-      for (const comment of comments) {
-        const response = await sendMessage([
-          {
-            role: 'system',
-            content: `You are a great live stream host. 
-            You are engaging and friendly. 
-            You are answering questions from the audience.
-            You will receive a comment and an answer for it, rephrase them in a way that is engaging, friendly and natural.` },
-          { role: 'user', content: formatCommentForSpeech(comment) }
-        ]);
+    // const comments = await fetchComments();
+    // const commentChunks = [];
+    // for (const comment of comments) {
+    //   commentChunks.push(formatCommentForSpeech(comment));
+    // }
+
+    const commentChunks = await processCommentsAsChunks(avatar);
+
+    if (commentChunks.length > 0) {
+      for (const commentChunk of commentChunks) {
         await avatar.speak({
-          text: response?.content || "No response from Llama",
+          text: commentChunk,
           taskType: TaskType.REPEAT,
           taskMode: TaskMode.SYNC,
         });
       }
+    }
 
-      // for (const comment of comments) {
-      //   await avatar.speak({
-      //     text: formatCommentForSpeech(comment),
-      //     taskType: TaskType.REPEAT,
-      //     taskMode: TaskMode.SYNC,
-      //   });
-      // }
-
-      // await avatar.speak({
-      //   text: "Thank you for all your great questions!",
-      //   taskType: TaskType.REPEAT,
-      //   taskMode: TaskMode.SYNC,
-      // });
+    if (startIndex < chunks.length - 1) {
+      await speakChunksSequentially(avatar, chunks, startIndex + 1);
     }
   };
 
@@ -187,11 +247,10 @@ function InteractiveAvatar() {
           taskMode: TaskMode.SYNC,
         });
       }).then(async () => {
-        // const scriptChunks = await readPitchScript();
-        // if (scriptChunks && scriptChunks.length > 0) {
-        //   await speakChunksSequentially(avatar, scriptChunks);
-        // }
-        return handleComments(avatar);
+        const scriptChunks = await readPitchScript();
+        if (scriptChunks && scriptChunks.length > 0) {
+          await speakChunksSequentially(avatar, scriptChunks);
+        }
       }).catch((error) => {
         console.error('Error in greeting sequence:', error);
       });
