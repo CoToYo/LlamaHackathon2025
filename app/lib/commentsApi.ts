@@ -15,7 +15,7 @@ export async function fetchComments(): Promise<{ question: string; answer: strin
   try {
     const response = await fetch('https://s9tv8rcbh1.execute-api.us-east-1.amazonaws.com/prod/responses');
     const data: CommentsResponse = await response.json();
-    
+
     // Extract only question and answer fields
     return data.responses.map(comment => ({
       question: comment.question,
@@ -28,5 +28,5 @@ export async function fetchComments(): Promise<{ question: string; answer: strin
 }
 
 export function formatCommentForSpeech(comment: { question: string; answer: string }): string {
-  return `We hear some users asked ${comment.question}, the answer is ${comment.answer}`;
+  return `We hear some users asked ${comment.question}, ${comment.answer}`;
 } 

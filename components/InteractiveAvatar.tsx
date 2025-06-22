@@ -25,13 +25,6 @@ import { MessageHistory } from "./AvatarSession/MessageHistory";
 
 import { AVATARS } from "@/app/lib/constants";
 
-import LlamaAPIClient from 'llama-api-client';
-
-type Message = {
-  role: "user" | "assistant" | "system";
-  content: string;
-};
-
 const DEFAULT_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
   avatarName: AVATARS[0].avatar_id,
@@ -96,7 +89,7 @@ function InteractiveAvatar() {
     const commentChunks = [];
 
     // Add introduction for comments
-    commentChunks.push("Let me address some questions from our viewers.");
+    // commentChunks.push("Wow, I see some questions from our viewers. Let me address them.");
 
     for (const comment of comments) {
       try {
@@ -109,8 +102,27 @@ function InteractiveAvatar() {
             messages: [
               {
                 role: "system",
-                content: `You are a great live stream host. You are engaging and friendly. 
-                You will receive audience's comments and our response to the comment. Rephrase them into a short and concise response.`
+                content: `You are a charismatic and engaging livestream host. Your job is to respond to viewer comments in a way that is:
+
+Concise – Keep it short and to the point.
+
+Entertaining – Add personality, wit, and light humor.
+
+Natural – Sound like you're speaking live, not reading a script.
+
+Interactive – Maintain flow and bridge smoothly to the next comment or topic.
+
+Instructions:
+You will be given a viewer comment and an intended reaction.
+Rewrite it into a spoken-style host response that feels fun, real, and keeps the energy high.
+
+Rules:
+
+Only output the host's spoken line.
+
+No extra explanation, narration, or tags.
+
+Make it friendly, lively, and flowing.`
               },
               {
                 role: "user",
@@ -127,6 +139,8 @@ function InteractiveAvatar() {
 
         const result = await apiResponse.json();
         commentChunks.push(result.content);
+
+        // commentChunks.push(formatCommentForSpeech(comment));
       } catch (error) {
         console.error("Error processing comment:", error);
       }
@@ -134,41 +148,40 @@ function InteractiveAvatar() {
 
     // Add closing for comments
     if (commentChunks.length > 1) { // More than just the introduction
-      commentChunks.push("Thank you for your questions! Now let's continue with our presentation.");
+      commentChunks.push("Ok. Let's continue.");
     }
 
     return commentChunks;
   };
 
-  const speakChunksSequentially = async (avatar: any, chunks: string[]) => {
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
+  const speakChunksSequentially = async (avatar: any, chunks: string[], startIndex: number = 0) => {
+    await avatar.speak({
+      text: chunks[startIndex],
+      taskType: TaskType.REPEAT,
+      taskMode: TaskMode.SYNC,
+    });
 
-      // Speak the current chunk
-      await avatar.speak({
-        text: chunk,
-        taskType: TaskType.REPEAT,
-        taskMode: TaskMode.SYNC,
-      });
+    // const comments = await fetchComments();
+    // const commentChunks = [];
+    // for (const comment of comments) {
+    //   commentChunks.push(formatCommentForSpeech(comment));
+    // }
 
-      // After each chunk, check for new comments and process them
-      const commentChunks = await processCommentsAsChunks(avatar);
+    const commentChunks = await processCommentsAsChunks(avatar);
 
-      if (commentChunks.length > 0) {
-        // Insert comment chunks into the sequence after the current chunk
-        const remainingChunks = chunks.slice(i + 1);
-        chunks.splice(i + 1, 0, ...commentChunks);
-
-        // Update the loop to include the new chunks
-        // We don't need to increment i here because we're inserting chunks
-        // and the loop will naturally process them
+    if (commentChunks.length > 0) {
+      for (const commentChunk of commentChunks) {
+        await avatar.speak({
+          text: commentChunk,
+          taskType: TaskType.REPEAT,
+          taskMode: TaskMode.SYNC,
+        });
       }
     }
-  };
 
-  const getScriptChunks = async (script: string) => {
-    // Feed pitch script to llama and get script chunks back
-    // The script chunks are the parts of the script that are separated by a new line
+    if (startIndex < chunks.length - 1) {
+      await speakChunksSequentially(avatar, chunks, startIndex + 1);
+    }
   };
 
   const startSessionV2 = useMemoizedFn(async (isVoiceChat: boolean) => {
