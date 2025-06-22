@@ -86,32 +86,20 @@ function InteractiveAvatar() {
     }
   };
 
-  const speakChunksSequentially = async (avatar: any, chunks: string[]) => {
-    for (const chunk of chunks) {
-      await avatar.speak({
-        text: chunk,
-        taskType: TaskType.REPEAT,
-        taskMode: TaskMode.SYNC,
-      });
-    }
-  };
-
-  const getScriptChunks = async (script: string) => {
-    // Feed pitch script to llama and get script chunks back
-    // The script chunks are the parts of the script that are separated by a new line
-  };
-
-  const handleComments = async (avatar: any) => {
+  const processCommentsAsChunks = async (avatar: any) => {
     const comments = await fetchComments();
 
-    if (comments.length > 0) {
-      await avatar.speak({
-        text: "Now, let's address some questions from our viewers.",
-        taskType: TaskType.REPEAT,
-        taskMode: TaskMode.SYNC,
-      });
+    if (comments.length === 0) {
+      return [];
+    }
 
-      for (const comment of comments) {
+    const commentChunks = [];
+
+    // Add introduction for comments
+    commentChunks.push("Let me address some questions from our viewers.");
+
+    for (const comment of comments) {
+      try {
         const apiResponse = await fetch("/api/llama-chat", {
           method: "POST",
           headers: {
@@ -134,25 +122,53 @@ function InteractiveAvatar() {
 
         if (!apiResponse.ok) {
           console.error("Failed to call Llama API");
-          console.error(apiResponse);
           continue;
         }
 
         const result = await apiResponse.json();
-
-        await avatar.speak({
-          text: result.content,
-          taskType: TaskType.REPEAT,
-          taskMode: TaskMode.SYNC,
-        });
+        commentChunks.push(result.content);
+      } catch (error) {
+        console.error("Error processing comment:", error);
       }
+    }
 
+    // Add closing for comments
+    if (commentChunks.length > 1) { // More than just the introduction
+      commentChunks.push("Thank you for your questions! Now let's continue with our presentation.");
+    }
+
+    return commentChunks;
+  };
+
+  const speakChunksSequentially = async (avatar: any, chunks: string[]) => {
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+
+      // Speak the current chunk
       await avatar.speak({
-        text: "Thank you for all your great questions!",
+        text: chunk,
         taskType: TaskType.REPEAT,
         taskMode: TaskMode.SYNC,
       });
+
+      // After each chunk, check for new comments and process them
+      const commentChunks = await processCommentsAsChunks(avatar);
+
+      if (commentChunks.length > 0) {
+        // Insert comment chunks into the sequence after the current chunk
+        const remainingChunks = chunks.slice(i + 1);
+        chunks.splice(i + 1, 0, ...commentChunks);
+
+        // Update the loop to include the new chunks
+        // We don't need to increment i here because we're inserting chunks
+        // and the loop will naturally process them
+      }
     }
+  };
+
+  const getScriptChunks = async (script: string) => {
+    // Feed pitch script to llama and get script chunks back
+    // The script chunks are the parts of the script that are separated by a new line
   };
 
   const startSessionV2 = useMemoizedFn(async (isVoiceChat: boolean) => {
@@ -208,11 +224,10 @@ function InteractiveAvatar() {
           taskMode: TaskMode.SYNC,
         });
       }).then(async () => {
-        // const scriptChunks = await readPitchScript();
-        // if (scriptChunks && scriptChunks.length > 0) {
-        //   await speakChunksSequentially(avatar, scriptChunks);
-        // }
-        return handleComments(avatar);
+        const scriptChunks = await readPitchScript();
+        if (scriptChunks && scriptChunks.length > 0) {
+          await speakChunksSequentially(avatar, scriptChunks);
+        }
       }).catch((error) => {
         console.error('Error in greeting sequence:', error);
       });
