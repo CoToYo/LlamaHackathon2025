@@ -4,6 +4,8 @@ This demo spins up **Lisa**, your AI-powered live shopping host, designed to emp
 
 ## 🔥 Background
 
+https://www.cnbc.com/2025/06/19/ai-humans-in-china-just-proved-they-are-better-influencers.html Just last week, A Chinese entrepreneur raked in $7.65 million after streaming using an interactive digital avatar.
+
 Live shopping has become a powerful commerce channel. Platforms like **TikTok Shop** have proven this by generating **$1.5M GMV in a single live session**. However, many small or emerging sellers struggle to host livestreams due to lack of time, expertise, or budget to hire a live host.
 
 ## 💡 Our Solution
