@@ -1,22 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { LlamaClient, LlamaMessage } from '@/app/lib/llamaClient';
+import { llamaChat, Message } from "@/app/lib/llamaApi";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request): Promise<Response> {
 	try {
-		const { messages } = await request.json();
+		const body: { messages: Message[] } = await request.json();
+		const { messages } = body;
 
-		const client = new LlamaClient(
-			process.env.LLAMA_API_URL || 'http://localhost:11434',
-			process.env.LLAMA_API_KEY || ''
-		);
+		if (!messages || messages.length === 0) {
+			return new Response(JSON.stringify({ error: 'Messages are required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-		const response = await client.chat(messages);
+		const completion = await llamaChat(messages);
 
-		return NextResponse.json(response);
+		return new Response(JSON.stringify({ content: completion.content }), {
+			status: 200,
+			headers: { 'Content-Type': 'application/json' },
+		});
 	} catch (error) {
-		return NextResponse.json(
-			{ error: 'Failed to get response from Llama' },
-			{ status: 500 }
-		);
+		console.error('Error in Llama chat API:', error);
+		const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+		return new Response(JSON.stringify({ error: errorMessage }), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' },
+		});
 	}
 } 

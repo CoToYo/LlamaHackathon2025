@@ -25,7 +25,12 @@ import { MessageHistory } from "./AvatarSession/MessageHistory";
 
 import { AVATARS } from "@/app/lib/constants";
 
-import { useLlama } from "@/app/lib/useLlama";
+import LlamaAPIClient from 'llama-api-client';
+
+type Message = {
+  role: "user" | "assistant" | "system";
+  content: string;
+};
 
 const DEFAULT_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
@@ -47,7 +52,6 @@ function InteractiveAvatar() {
   const { initAvatar, startAvatar, stopAvatar, sessionState, stream } =
     useStreamingAvatarSession();
   const { startVoiceChat } = useVoiceChat();
-  const { sendMessage, loading, error } = useLlama();
 
   const [config, setConfig] = useState<StartAvatarRequest>(DEFAULT_CONFIG);
   const mediaStream = useRef<HTMLVideoElement>(null);
@@ -92,8 +96,14 @@ function InteractiveAvatar() {
     }
   };
 
+  const getScriptChunks = async (script: string) => {
+    // Feed pitch script to llama and get script chunks back
+    // The script chunks are the parts of the script that are separated by a new line
+  };
+
   const handleComments = async (avatar: any) => {
     const comments = await fetchComments();
+
     if (comments.length > 0) {
       await avatar.speak({
         text: "Now, let's address some questions from our viewers.",
@@ -102,35 +112,46 @@ function InteractiveAvatar() {
       });
 
       for (const comment of comments) {
-        const response = await sendMessage([
-          {
-            role: 'system',
-            content: `You are a great live stream host. 
-            You are engaging and friendly. 
-            You are answering questions from the audience.
-            You will receive a comment and an answer for it, rephrase them in a way that is engaging, friendly and natural.` },
-          { role: 'user', content: formatCommentForSpeech(comment) }
-        ]);
+        const apiResponse = await fetch("/api/llama-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "system",
+                content: `You are a great live stream host. You are engaging and friendly. 
+                You will receive audience's comments and our response to the comment. Rephrase them into a short and concise response.`
+              },
+              {
+                role: "user",
+                content: formatCommentForSpeech(comment),
+              },
+            ],
+          }),
+        });
+
+        if (!apiResponse.ok) {
+          console.error("Failed to call Llama API");
+          console.error(apiResponse);
+          continue;
+        }
+
+        const result = await apiResponse.json();
+
         await avatar.speak({
-          text: response?.content || "No response from Llama",
+          text: result.content,
           taskType: TaskType.REPEAT,
           taskMode: TaskMode.SYNC,
         });
       }
 
-      // for (const comment of comments) {
-      //   await avatar.speak({
-      //     text: formatCommentForSpeech(comment),
-      //     taskType: TaskType.REPEAT,
-      //     taskMode: TaskMode.SYNC,
-      //   });
-      // }
-
-      // await avatar.speak({
-      //   text: "Thank you for all your great questions!",
-      //   taskType: TaskType.REPEAT,
-      //   taskMode: TaskMode.SYNC,
-      // });
+      await avatar.speak({
+        text: "Thank you for all your great questions!",
+        taskType: TaskType.REPEAT,
+        taskMode: TaskMode.SYNC,
+      });
     }
   };
 
