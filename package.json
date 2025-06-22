@@ -9,6 +9,7 @@
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.832.0",
     "@heygen/streaming-avatar": "^2.0.13",
     "@radix-ui/react-select": "^2.1.7",
     "@radix-ui/react-switch": "^1.1.4",
@@ -20,12 +21,12 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^15.3.1",
     "@types/node": "20.5.7",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.1.2",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
-    "@next/eslint-plugin-next": "^15.3.1",
     "autoprefixer": "10.4.19",
     "eslint": "^9.25.1",
     "eslint-config-prettier": "^10.1.2",

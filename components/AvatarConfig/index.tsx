@@ -10,8 +10,8 @@ import {
 
 import { Input } from "../Input";
 import { Select } from "../Select";
-
 import { Field } from "./Field";
+import { FileUpload } from "./FileUpload";
 
 import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
 
@@ -54,6 +54,7 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
 
   return (
     <div className="relative flex flex-col gap-4 w-[550px] py-8 max-h-full overflow-y-auto px-4">
+      <FileUpload />
       <Field label="Custom Knowledge Base ID">
         <Input
           placeholder="Enter custom knowledge base ID"
