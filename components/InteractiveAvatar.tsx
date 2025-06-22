@@ -140,6 +140,16 @@ Make it friendly, lively, and flowing.`
         const result = await apiResponse.json();
         commentChunks.push(result.content);
 
+        // Acknowledge the comment after successful processing
+        try {
+          await fetch(`/api/responses/${comment.comment_id}/ack`, {
+            method: "POST",
+          });
+          console.log(`Acknowledged comment: ${comment.comment_id}`);
+        } catch (ackError) {
+          console.error(`Failed to acknowledge comment ${comment.comment_id}:`, ackError);
+        }
+
         // commentChunks.push(formatCommentForSpeech(comment));
       } catch (error) {
         console.error("Error processing comment:", error);
