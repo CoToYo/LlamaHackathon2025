@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(
 	request: NextRequest,
-	{ params }: { params: { comment_id: string } }
+	{ params }: { params: Promise<{ comment_id: string }> }
 ) {
 	try {
-		const { comment_id } = params;
+		const { comment_id } = await params;
 
 		if (!comment_id) {
 			return NextResponse.json(
