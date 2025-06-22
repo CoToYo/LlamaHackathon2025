@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Any
 try:
     from scraper.general_scraper import ProductScraper
     from scripts.script_writer import ScriptWriter
+    from comment_responder.comment_responder import CommentResponder
 except ImportError:
     # Try alternative import path
     try:
@@ -20,18 +21,13 @@ except ImportError:
 
 
 class Writer:
-    """
-    A class that processes string input and generates comprehensive product data
-    using the ProductScraper class.
-    """
-    
     def __init__(self):
-        """
-        Initialize the Writer with a ProductScraper instance.
-        """
         self.scraper = ProductScraper()
-        print("✅ Writer initialized")
+        print("✅ ProductScraper initialized")
         self.script_writer = ScriptWriter()
+        print("✅ ScriptWriter initialized")
+        self.comment_responder = CommentResponder()
+        print("✅ CommentResponder initialized")
     
     def process_product_input(self, product_input: str) -> Dict[str, Any]:
         """
@@ -79,29 +75,46 @@ class Writer:
         """
         return self.script_writer.generate_script(product_data, time)
 
+    def generate_comment_response(self, product_data: Dict[str, Any], question: str, time: str) -> str:
+        """
+        Generate a comment response based on the product data.
+        """
+        return self.comment_responder.generate_command_response(product_data, question, time)
+
 
     
 
 def main():
     """
-    Main function to demonstrate the GeneralProductProcessor usage.
+    Main function to demonstrate the Writer usage.
     """
     # Initialize the processor
     processor = Writer()
+   
+    test_input = "placeholder"
+    test_question = "placeholder"
+    intro_time = "40 seconds"
+    answer_time = "10 seconds"
 
-    
-    test_input = "Meta Ray-Ban Smart Glasses are innovative smart glasses that combine classic Ray-Ban styling with advanced technology. They feature built-in cameras, speakers, and voice control capabilities."
-    
+    ##### Write the script #####
     product_data = processor.process_product_input(test_input)
     #print(f"\n✅ Product data: {product_data}")
     
     print(f"\n✅ Processing product details completed!")
 
-    script = processor.generate_script(product_data, "40 seconds")
-    #print(f"\n✅ Script: {script}")
+    script = processor.generate_script(product_data, intro_time)
+
+    print(f"\n✅ Script: {script}")
+
     print(f"\n✅ Script generated successfully")
 
-    return script
+
+    ##### Answer the question #####
+    print(f"\n❓Question is: {test_question}")
+    comment_response = processor.generate_comment_response(product_data, test_question, answer_time)
+    print(f"\n✅ Comment response: {comment_response}")
+
+    return script, comment_response
     
 
 
