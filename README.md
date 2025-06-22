@@ -24,6 +24,10 @@ At **LLAMA Hackathon 2025**, we introduce **Lisa**, the AI Live Shopping Host. L
 
 This is a step toward democratizing live commerce for all.
 
+## Design Graph
+<img width="1174" alt="image" src="https://github.com/user-attachments/assets/6716020f-3c44-4e10-9c87-1d45a8058d85" />
+
+
 ## 🎥 Demo Flow
 
 1. **Upload Product Data via Seller Portal**
