@@ -1,0 +1,5 @@
+{
+	"api_url": "https://s9tv8rcbh1.execute-api.us-east-1.amazonaws.com/prod/responses",
+	"interval": 60,
+	"timeout": 10
+}

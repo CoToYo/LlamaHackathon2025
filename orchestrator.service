@@ -1,0 +1,15 @@
+[Unit]
+Description=Orchestrator Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/path/to/your/orchestrator
+ExecStart=/usr/bin/python3 /path/to/your/orchestrator/Orchestrator.py
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target 
