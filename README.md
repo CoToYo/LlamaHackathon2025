@@ -10,6 +10,10 @@ Live shopping has become a powerful commerce channel. Platforms like **TikTok Sh
 
 ## 💡 Our Solution
 
+[Video demo walkthrough](https://youtu.be/ounoLPS2V6o?si=DaIG_ciMq-T14_uU)
+
+[video demo](https://www.facebook.com/100002903423373/videos/722360127197187)
+
 At **LLAMA Hackathon 2025**, we introduce **Lisa**, the AI Live Shopping Host. Lisa is a virtual livestream presenter that:
 
 - Runs a livestream on the seller’s behalf
