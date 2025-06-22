@@ -1,71 +1,85 @@
-# HeyGen Interactive Avatar NextJS Demo
+# 🛍️ AI Live Host Demo – LLAMA Hackathon 2025
 
-![HeyGen Interactive Avatar NextJS Demo Screenshot](./public/demo.png)
+This demo spins up **Lisa**, your AI-powered live shopping host, designed to empower sellers of all sizes to run engaging, real-time shopping streams — with zero on-camera presence needed.
 
-This is a sample project and was bootstrapped using [NextJS](https://nextjs.org/).
-Feel free to play around with the existing code and please leave any feedback for the SDK [here](https://github.com/HeyGen-Official/StreamingAvatarSDK/discussions).
+## 🔥 Background
 
-## Getting Started FAQ
+Live shopping has become a powerful commerce channel. Platforms like **TikTok Shop** have proven this by generating **$1.5M GMV in a single live session**. However, many small or emerging sellers struggle to host livestreams due to lack of time, expertise, or budget to hire a live host.
 
-### Setting up the demo
+## 💡 Our Solution
 
-1. Clone this repo
+At **LLAMA Hackathon 2025**, we introduce **Lisa**, the AI Live Shopping Host. Lisa is a virtual livestream presenter that:
 
-2. Navigate to the repo folder in your terminal
+- Runs a livestream on the seller’s behalf
+- Generates dynamic, engaging product intros using seller-provided data
+- Interacts with viewers in real time
+- Responds to comments and questions automatically
+- Maximizes conversion — without seller intervention
 
-3. Run `npm install` (assuming you have npm installed. If not, please follow these instructions: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/)
+This is a step toward democratizing live commerce for all.
 
-4. Enter your HeyGen Enterprise API Token in the `.env` file. Replace `HEYGEN_API_KEY` with your API key. This will allow the Client app to generate secure Access Tokens with which to create interactive sessions.
+## 🎥 Demo Flow
 
-   You can retrieve either the API Key by logging in to HeyGen and navigating to this page in your settings: [https://app.heygen.com/settings?from=&nav=Subscriptions%20%26%20API]. 
+1. **Upload Product Data via Seller Portal**
+   - Seller provides product specs, user reviews, FAQs, etc.
+   - We use this data to ground Lisa’s knowledge base.
 
-5. (Optional) If you would like to use the OpenAI features, enter your OpenAI Api Key in the `.env` file.
-
-6. Run `npm run dev`
-
-### Starting sessions
-
-NOTE: Make sure you have enter your token into the `.env` file and run `npm run dev`.
-
-To start your 'session' with a Interactive Avatar, first click the 'start' button. If your HeyGen API key is entered into the Server's .env file, then you should see our demo Interactive Avatar appear.
-
-If you want to see a different Avatar or try a different voice, you can close the session and enter the IDs and then 'start' the session again. Please see below for information on where to retrieve different Avatar and voice IDs that you can use.
-
-### Which Avatars can I use with this project?
-
-By default, there are several Public Avatars that can be used in Interactive Avatar. (AKA Interactive Avatars.) You can find the Avatar IDs for these Public Avatars by navigating to [labs.heygen.com/interactive-avatar](https://labs.heygen.com/interactive-avatar) and clicking 'Select Avatar' and copying the avatar id.
-
-You can create your own custom Interactive Avatars at labs.heygen.com/interactive-avatar by clicking 'create interactive avatar' on the top-left of the screen.
-
-### Where can I read more about enterprise-level usage of the Interactive Avatar API?
-
-Please read our Interactive Avatar 101 article for more information on pricing: https://help.heygen.com/en/articles/9182113-interactive-avatar-101-your-ultimate-guide
+   ![Lisa Live Demo](./markdown_images/seller_portal_onboarding.png)
 
 
-### Recent Changes
+2. **Generate Script with LLaMA**
+   - A scripted live show is dynamically created using Meta's LLaMA API.
 
-1. **API Integration**
-   - Added `commentsApi.ts` to handle fetching and formatting user comments
-   - Implemented comment fetching from AWS API endpoint
-   - Added comment formatting for speech synthesis
+3. **Launch AI Livestream via OBS to Facebook Live**
+   - The AI avatar (powered by HeyGen + LiveKit) goes live.
+   - Streaming is handled via OBS integration.
 
-2. **Text Processing**
-   - Created `textUtils.ts` with `splitIntoChunks` function
-   - Handles splitting long text into sentence-bounded chunks
-   - Maintains natural speech flow with max words per chunk
+      ![Lisa Live Demo](./markdown_images/seller_portal_agent.png)
 
-3. **Interactive Avatar Component**
-   - Enhanced `InteractiveAvatar.tsx` with:
-     - Script reading capabilities
-     - Sequential chunk speaking
-     - Comment handling system
-     - Event logging for avatar interactions
-     - Voice and text chat modes
+4. **Real-time Comment Handling**
+   - Viewer comments are asynchronously ingested and classified.
+   - Relevant questions are sent to LLaMA for contextual answers.
+   - Lisa responds live, alternating between script and Q&A.
 
-4. **Script Handling**
-   - Added `get-script` API route
-   - Implements file reading from `pitch_script.txt`
-   - Integrates with text chunking utility
-   - Provides error handling for script loading
+       ![Lisa Live Demo](./markdown_images/live_demo.png)
 
-These changes create a comprehensive system for managing avatar interactions, handling user comments, and delivering scripted content in a natural way.
+5. **Smart Orchestration**
+   - A custom orchestrator decides when to continue the script vs. when to answer viewer comments for maximum engagement and sales impact.
+
+## 🧩 Tech Stack
+
+- **AI Avatar Rendering:** HeyGen Streaming API
+- **Live Streaming Infrastructure:** LiveKit + OBS
+- **LLM Backend:** Meta LLaMA API
+- **Frontend Portal:** React + Node.js (optional)
+- **Comment Ingestion:** Async processing with WebSocket/Queue
+- **Script & Response Generation:** Prompt templating + LLaMA output parsing
+- **Orchestration Engine:** Custom-built decision layer
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- OBS Studio
+- Node.js / Python (for orchestration and backend scripts)
+- Access to:
+  - HeyGen Streaming API
+  - Meta LLaMA API
+  - LiveKit Room setup
+  - Facebook Live RTMP credentials
+
+### Local Setup
+
+```bash
+# Clone the repo
+git clone https://github.com/CoToYo/LlamaHackathon2025.git
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Add your API keys and configuration to .env
+
+# Run the app
+npm run dev
