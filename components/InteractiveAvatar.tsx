@@ -25,6 +25,8 @@ import { MessageHistory } from "./AvatarSession/MessageHistory";
 
 import { AVATARS } from "@/app/lib/constants";
 
+import { useLlama } from "@/app/lib/useLlama";
+
 const DEFAULT_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
   avatarName: AVATARS[0].avatar_id,
@@ -45,6 +47,7 @@ function InteractiveAvatar() {
   const { initAvatar, startAvatar, stopAvatar, sessionState, stream } =
     useStreamingAvatarSession();
   const { startVoiceChat } = useVoiceChat();
+  const { sendMessage, loading, error } = useLlama();
 
   const [config, setConfig] = useState<StartAvatarRequest>(DEFAULT_CONFIG);
   const mediaStream = useRef<HTMLVideoElement>(null);
@@ -99,18 +102,35 @@ function InteractiveAvatar() {
       });
 
       for (const comment of comments) {
+        const response = await sendMessage([
+          {
+            role: 'system',
+            content: `You are a great live stream host. 
+            You are engaging and friendly. 
+            You are answering questions from the audience.
+            You will receive a comment and an answer for it, rephrase them in a way that is engaging, friendly and natural.` },
+          { role: 'user', content: formatCommentForSpeech(comment) }
+        ]);
         await avatar.speak({
-          text: formatCommentForSpeech(comment),
+          text: response?.content || "No response from Llama",
           taskType: TaskType.REPEAT,
           taskMode: TaskMode.SYNC,
         });
       }
 
-      await avatar.speak({
-        text: "Thank you for all your great questions!",
-        taskType: TaskType.REPEAT,
-        taskMode: TaskMode.SYNC,
-      });
+      // for (const comment of comments) {
+      //   await avatar.speak({
+      //     text: formatCommentForSpeech(comment),
+      //     taskType: TaskType.REPEAT,
+      //     taskMode: TaskMode.SYNC,
+      //   });
+      // }
+
+      // await avatar.speak({
+      //   text: "Thank you for all your great questions!",
+      //   taskType: TaskType.REPEAT,
+      //   taskMode: TaskMode.SYNC,
+      // });
     }
   };
 
@@ -167,10 +187,10 @@ function InteractiveAvatar() {
           taskMode: TaskMode.SYNC,
         });
       }).then(async () => {
-        const scriptChunks = await readPitchScript();
-        if (scriptChunks && scriptChunks.length > 0) {
-          await speakChunksSequentially(avatar, scriptChunks);
-        }
+        // const scriptChunks = await readPitchScript();
+        // if (scriptChunks && scriptChunks.length > 0) {
+        //   await speakChunksSequentially(avatar, scriptChunks);
+        // }
         return handleComments(avatar);
       }).catch((error) => {
         console.error('Error in greeting sequence:', error);
